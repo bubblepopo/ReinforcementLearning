@@ -1,0 +1,70 @@
+
+num_train_epochs: -1
+
+train_max_frame: 1000
+eval_max_frame:  1200
+
+batch_size: 128
+
+num_train_steps: 1e6
+replay_buffer_capacity: 1000
+
+num_seed_steps: 500
+
+eval_frequency: 1
+num_eval_episodes: 1
+
+device: ${device}
+
+# logger
+log_frequency: 1000
+log_save_tb: true
+
+save_exceed_seconds: 10
+
+# video recorder
+save_video: true
+save_video_exceed_reward: -10000
+
+seed: 1
+
+env:
+  size:
+    obs_dim: 1 # to be changed in code
+    action_dim: 1 # to be changed in code
+    action_range: [0,1] # to be changed in code
+
+double_q_critic:
+  _target_: critic.DoubleQCritic
+  env_size: ${env.size}
+  action_range: 
+  hidden_dim: 128
+  hidden_depth: 2
+  
+diag_gaussian_actor:
+  _target_: actor.DiagGaussianActor
+  env_size: ${env.size}
+  hidden_depth: 2
+  hidden_dim: 128
+  log_std_bounds: [-5, 2]
+
+agent:
+  _target_: agent.sac.SACAgent
+  env_size: ${env.size}
+  device: ${device}
+  critic_cfg: ${double_q_critic}
+  actor_cfg: ${diag_gaussian_actor}
+  discount: 0.99
+  init_temperature: 0.1
+  alpha_lr: 1e-4
+  alpha_betas: [0.9, 0.999]
+  actor_lr: 1e-4
+  actor_betas: [0.9, 0.999]
+  actor_update_frequency: 1
+  critic_lr: 1e-4
+  critic_betas: [0.9, 0.999]
+  critic_tau: 0.05
+  critic_target_update_frequency: 2
+  batch_size: ${batch_size}
+  learnable_temperature: true
+      
